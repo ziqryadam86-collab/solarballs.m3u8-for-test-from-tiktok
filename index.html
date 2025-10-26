@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>SolarBalls Stream Player</title>
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    <style>
+        body { 
+            margin: 0; 
+            padding: 20px; 
+            background: #000; 
+            color: #fff; 
+            text-align: center;
+            font-family: Arial, sans-serif;
+        }
+        .player-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        video {
+            width: 100%;
+            max-width: 800px;
+            border: 3px solid #333;
+            border-radius: 10px;
+        }
+        h1 {
+            color: #fff;
+            margin-bottom: 20px;
+        }
+        .status {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 5px;
+            background: #154360;
+        }
+    </style>
+</head>
+<body>
+    <div class="player-container">
+        <h1>🎬 SolarBalls Video Stream</h1>
+        <div id="status" class="status">Loading player...</div>
+        <video id="video" controls></video>
+        <p>Powered by HLS.js & GitHub Pages</p>
+    </div>
+
+    <script>
+        const video = document.getElementById('video');
+        const status = document.getElementById('status');
+        const videoUrl = 'solarballs.m3u8';
+        
+        if (Hls.isSupported()) {
+            status.innerHTML = 'HLS.js supported - Loading video...';
+            const hls = new Hls();
+            hls.loadSource(videoUrl);
+            hls.attachMedia(video);
+            
+            hls.on(Hls.Events.MANIFEST_PARSED, function() {
+                status.innerHTML = '✅ Video loaded successfully! Playing...';
+                video.play();
+            });
+            
+            hls.on(Hls.Events.ERROR, function(event, data) {
+                console.error('Error:', data);
+                if (data.fatal) {
+                    switch(data.type) {
+                        case Hls.ErrorTypes.NETWORK_ERROR:
+                            status.innerHTML = '❌ Network error - Please check connection';
+                            break;
+                        case Hls.ErrorTypes.MEDIA_ERROR:
+                            status.innerHTML = '❌ Media error - Video file issue';
+                            break;
+                        default:
+                            status.innerHTML = '❌ Fatal error - Cannot recover';
+                            break;
+                    }
+                }
+            });
+            
+        } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+            status.innerHTML = 'Using native HLS support...';
+            video.src = videoUrl;
+            video.addEventListener('loadedmetadata', function() {
+                status.innerHTML = '✅ Video loaded!';
+                video.play();
+            });
+        } else {
+            status.innerHTML = '❌ HLS not supported in your browser';
+        }
+    </script>
+</body>
+</html>
